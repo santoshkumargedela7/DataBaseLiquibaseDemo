@@ -1,0 +1,49 @@
+
+package com.db.operations.config;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.db.operations.config.secrets.VaultAuthenticator;
+
+@Component
+public class LiquibasePropertiesUpdater {
+
+	private final VaultAuthenticator vaultAuthenticator;
+
+	@Value("${kv-secret-path}")
+	private String vaultSecretPath;
+
+	@Value("${vault.auth.roleId}")
+	private String roleID;
+
+	@Value("${vault.auth.secretId}")
+	private String secretID;
+
+	public LiquibasePropertiesUpdater(VaultAuthenticator vaultAuthenticator) {
+		this.vaultAuthenticator = vaultAuthenticator;
+	}
+
+	public void updateLiquibaseProperties() {
+		// Retrieve secrets from Vault
+		Map<String, String> secrets = getSecretsFromVault(vaultSecretPath);
+
+		// Set system properties for Liquibase to use
+		System.setProperty("LIQUIBASE_URL", secrets.get("url"));
+		System.setProperty("LIQUIBASE_USERNAME", secrets.get("username"));
+		System.setProperty("LIQUIBASE_PASSWORD", secrets.get("password"));
+	}
+
+	private Map<String, String> getSecretsFromVault(String path) {
+		// Retrieve secrets from Vault using VaultAuthenticator
+		String vaultToken = vaultAuthenticator.authenticateAppRole(roleID, secretID, path);
+
+		// Logic to fetch secrets from Vault
+		// This can be modified based on your actual Vault setup
+		Map<String, String> secrets = vaultAuthenticator.getSecrets(vaultToken, path);
+
+		return secrets;
+	}
+}
