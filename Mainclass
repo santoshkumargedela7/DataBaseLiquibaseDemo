@@ -1,0 +1,42 @@
+package com.db.operations;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import com.db.operations.config.LiquibasePropertiesUpdater;
+import com.db.operations.config.VaultMain;
+
+@SpringBootApplication
+public class DataBaseLiquibaseDemoApplication implements ApplicationRunner {
+		
+	@Autowired
+	private VaultMain vaultMain;
+	@Autowired
+	private LiquibasePropertiesUpdater liquibasePropertiesUpdater;
+
+	@GetMapping("/get")
+	public String getMessage() {
+		return "welcome to the java world ";
+	}
+
+	public static void main(String[] args) throws IOException {
+		System.out.println("Learning integration of liquibase demo");
+
+		SpringApplication.run(DataBaseLiquibaseDemoApplication.class, args);
+	}
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+
+		liquibasePropertiesUpdater.updateLiquibaseProperties();
+		vaultMain.performVaultOperations();
+		vaultMain.readVaultAttributes();
+	}
+
+}
